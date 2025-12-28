@@ -9,12 +9,12 @@ export async function registerRoutes(server: FastifyInstance) {
   // Health check
   server.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
 
-  // Auth (julkinen)
-  await server.register(authRoutes, { prefix: '/auth' });
+  // Auth (public)
+  await server.register(authRoutes, { prefix: '/api/auth' });
 
   // API routes
-  await server.register(studyRoutes, { prefix: '/studies' });
-  await server.register(sessionRoutes, { prefix: '/sessions' });
-  await server.register(bookingRoutes, { prefix: '/bookings' });
-  await server.register(timeSlotRoutes, { prefix: '/timeslots' });
+  await server.register(studyRoutes, { prefix: '/api/studies' });
+  await server.register(sessionRoutes, { prefix: '/api/sessions' });
+  await server.register(bookingRoutes, { prefix: '/api/bookings' });
+  await server.register(timeSlotRoutes, { prefix: '/api/timeslots' });
 }
