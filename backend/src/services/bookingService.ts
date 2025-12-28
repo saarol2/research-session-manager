@@ -41,7 +41,7 @@ export async function createBooking(data: {
   email?: string;
   consentAt: Date;
 }) {
-  // Make sure the slot has capacity before creating the booking
+  // Check capacity before creating booking
   const slot = await prisma.timeSlot.findUnique({
     where: { id: data.slotId },
     include: { bookings: true },

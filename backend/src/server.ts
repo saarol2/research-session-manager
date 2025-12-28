@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
 import { registerRoutes } from './routes/index.js';
+import { authMiddleware } from './middleware/auth.js';
 
 const server = Fastify({ logger: true });
 
@@ -10,6 +12,14 @@ await server.register(cors, {
   origin: ['http://localhost:5173', 'http://localhost:3001'],
   credentials: true,
 });
+
+// JWT
+await server.register(jwt, {
+  secret: process.env.JWT_SECRET || 'development-secret-change-in-production',
+});
+
+// Auth middleware (authenticate decorator)
+await authMiddleware(server);
 
 // Register all routes
 await registerRoutes(server);

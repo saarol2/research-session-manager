@@ -9,15 +9,22 @@ generator client {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("researcher") // "researcher" | "admin"
+  createdAt DateTime @default(now())
+  studies   Study[]  // Researcher owns studies
 }
 
 model Study {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String?
+  owner       User      @relation(fields: [ownerId], references: [id])
+  ownerId     Int
+  createdAt   DateTime  @default(now())
   sessions    Session[]
 }
 
