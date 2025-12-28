@@ -2,11 +2,15 @@ import { prisma } from '../db.js';
 
 export async function getAllSessions() {
   return prisma.session.findMany({
+    where: { deletedAt: null },
     include: {
       study: true,
       slots: {
+        where: { deletedAt: null },
         include: {
-          bookings: true,
+          bookings: {
+            where: { deletedAt: null },
+          },
         },
       },
     },
@@ -14,13 +18,16 @@ export async function getAllSessions() {
 }
 
 export async function getSessionById(id: number) {
-  return prisma.session.findUnique({
-    where: { id },
+  return prisma.session.findFirst({
+    where: { id, deletedAt: null },
     include: {
       study: true,
       slots: {
+        where: { deletedAt: null },
         include: {
-          bookings: true,
+          bookings: {
+            where: { deletedAt: null },
+          },
         },
       },
     },
@@ -29,11 +36,14 @@ export async function getSessionById(id: number) {
 
 export async function getSessionsByStudyId(studyId: number) {
   return prisma.session.findMany({
-    where: { studyId },
+    where: { studyId, deletedAt: null },
     include: {
       slots: {
+        where: { deletedAt: null },
         include: {
-          bookings: true,
+          bookings: {
+            where: { deletedAt: null },
+          },
         },
       },
     },
@@ -55,7 +65,8 @@ export async function createSession(data: {
 }
 
 export async function deleteSession(id: number) {
-  return prisma.session.delete({
+  return prisma.session.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 }

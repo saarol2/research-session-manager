@@ -1,4 +1,4 @@
-import { PrismaClient } from './generated/prisma/client.js';
+import { PrismaClient, Role } from './generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcrypt';
 import 'dotenv/config';
@@ -20,7 +20,7 @@ async function main() {
       email: 'researcher@example.com',
       password: hashedPassword,
       name: 'Test Researcher',
-      role: 'researcher',
+      role: Role.researcher,
     },
   });
   console.log('Created user:', researcher.email);

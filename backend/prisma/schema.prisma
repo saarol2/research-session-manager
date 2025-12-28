@@ -8,14 +8,20 @@ generator client {
   output   = "./generated/prisma"
 }
 
+enum Role {
+  researcher
+  admin
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
   password  String
   name      String?
-  role      String   @default("researcher") // "researcher" | "admin"
-  createdAt DateTime @default(now())
-  studies   Study[]  // Researcher owns studies
+  role      Role      @default(researcher)
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  studies   Study[]
 }
 
 model Study {
@@ -25,6 +31,7 @@ model Study {
   owner       User      @relation(fields: [ownerId], references: [id])
   ownerId     Int
   createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
   sessions    Session[]
 }
 
@@ -34,24 +41,30 @@ model Session {
   studyId   Int
   location  String
   date      DateTime
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
   slots     TimeSlot[]
 }
 
 model TimeSlot {
-  id        Int      @id @default(autoincrement())
-  session   Session  @relation(fields: [sessionId], references: [id])
+  id        Int       @id @default(autoincrement())
+  session   Session   @relation(fields: [sessionId], references: [id])
   sessionId Int
   startTime DateTime
   endTime   DateTime
   capacity  Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
   bookings  Booking[]
 }
 
 model Booking {
-  id         Int      @id @default(autoincrement())
-  slot       TimeSlot @relation(fields: [slotId], references: [id])
+  id         Int       @id @default(autoincrement())
+  slot       TimeSlot  @relation(fields: [slotId], references: [id])
   slotId     Int
   name       String
   email      String?
   consentAt  DateTime
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
 }

@@ -2,13 +2,17 @@ import { prisma } from '../db.js';
 
 export async function getAllStudies() {
   return prisma.study.findMany({
+    where: { deletedAt: null },
     include: {
       owner: {
         select: { id: true, email: true, name: true },
       },
       sessions: {
+        where: { deletedAt: null },
         include: {
-          slots: true,
+          slots: {
+            where: { deletedAt: null },
+          },
         },
       },
     },
@@ -17,13 +21,17 @@ export async function getAllStudies() {
 
 export async function getStudiesByOwnerId(ownerId: number) {
   return prisma.study.findMany({
-    where: { ownerId },
+    where: { ownerId, deletedAt: null },
     include: {
       sessions: {
+        where: { deletedAt: null },
         include: {
           slots: {
+            where: { deletedAt: null },
             include: {
-              bookings: true,
+              bookings: {
+                where: { deletedAt: null },
+              },
             },
           },
         },
@@ -33,17 +41,21 @@ export async function getStudiesByOwnerId(ownerId: number) {
 }
 
 export async function getStudyById(id: number) {
-  return prisma.study.findUnique({
-    where: { id },
+  return prisma.study.findFirst({
+    where: { id, deletedAt: null },
     include: {
       owner: {
         select: { id: true, email: true, name: true },
       },
       sessions: {
+        where: { deletedAt: null },
         include: {
           slots: {
+            where: { deletedAt: null },
             include: {
-              bookings: true,
+              bookings: {
+                where: { deletedAt: null },
+              },
             },
           },
         },
@@ -74,7 +86,8 @@ export async function updateStudy(
 }
 
 export async function deleteStudy(id: number) {
-  return prisma.study.delete({
+  return prisma.study.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 }

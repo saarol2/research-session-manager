@@ -2,6 +2,7 @@ import { prisma } from '../db.js';
 
 export async function getAllBookings() {
   return prisma.booking.findMany({
+    where: { deletedAt: null },
     include: {
       slot: {
         include: {
@@ -17,8 +18,8 @@ export async function getAllBookings() {
 }
 
 export async function getBookingById(id: number) {
-  return prisma.booking.findUnique({
-    where: { id },
+  return prisma.booking.findFirst({
+    where: { id, deletedAt: null },
     include: {
       slot: {
         include: {
@@ -31,7 +32,7 @@ export async function getBookingById(id: number) {
 
 export async function getBookingsBySlotId(slotId: number) {
   return prisma.booking.findMany({
-    where: { slotId },
+    where: { slotId, deletedAt: null },
   });
 }
 
@@ -42,9 +43,13 @@ export async function createBooking(data: {
   consentAt: Date;
 }) {
   // Check capacity before creating booking
-  const slot = await prisma.timeSlot.findUnique({
-    where: { id: data.slotId },
-    include: { bookings: true },
+  const slot = await prisma.timeSlot.findFirst({
+    where: { id: data.slotId, deletedAt: null },
+    include: {
+      bookings: {
+        where: { deletedAt: null },
+      },
+    },
   });
 
   if (!slot) {
@@ -64,7 +69,8 @@ export async function createBooking(data: {
 }
 
 export async function deleteBooking(id: number) {
-  return prisma.booking.delete({
+  return prisma.booking.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 }

@@ -2,28 +2,35 @@ import { prisma } from '../db.js';
 
 export async function getAllTimeSlots() {
   return prisma.timeSlot.findMany({
+    where: { deletedAt: null },
     include: {
       session: true,
-      bookings: true,
+      bookings: {
+        where: { deletedAt: null },
+      },
     },
   });
 }
 
 export async function getTimeSlotById(id: number) {
-  return prisma.timeSlot.findUnique({
-    where: { id },
+  return prisma.timeSlot.findFirst({
+    where: { id, deletedAt: null },
     include: {
       session: true,
-      bookings: true,
+      bookings: {
+        where: { deletedAt: null },
+      },
     },
   });
 }
 
 export async function getTimeSlotsBySessionId(sessionId: number) {
   return prisma.timeSlot.findMany({
-    where: { sessionId },
+    where: { sessionId, deletedAt: null },
     include: {
-      bookings: true,
+      bookings: {
+        where: { deletedAt: null },
+      },
     },
   });
 }
@@ -57,17 +64,20 @@ export async function updateTimeSlot(
 }
 
 export async function deleteTimeSlot(id: number) {
-  return prisma.timeSlot.delete({
+  return prisma.timeSlot.update({
     where: { id },
+    data: { deletedAt: new Date() },
   });
 }
 
 // Apufunktio: hae aikaväli ja laske vapaat paikat
 export async function getTimeSlotWithAvailability(id: number) {
-  const slot = await prisma.timeSlot.findUnique({
-    where: { id },
+  const slot = await prisma.timeSlot.findFirst({
+    where: { id, deletedAt: null },
     include: {
-      bookings: true,
+      bookings: {
+        where: { deletedAt: null },
+      },
       session: {
         include: {
           study: true,
