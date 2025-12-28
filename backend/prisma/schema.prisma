@@ -1,0 +1,50 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+}
+
+model Study {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  sessions    Session[]
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  study     Study     @relation(fields: [studyId], references: [id])
+  studyId   Int
+  location  String
+  date      DateTime
+  slots     TimeSlot[]
+}
+
+model TimeSlot {
+  id        Int      @id @default(autoincrement())
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId Int
+  startTime DateTime
+  endTime   DateTime
+  capacity  Int
+  bookings  Booking[]
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  slot       TimeSlot @relation(fields: [slotId], references: [id])
+  slotId     Int
+  name       String
+  email      String?
+  consentAt  DateTime
+}
