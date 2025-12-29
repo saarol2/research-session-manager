@@ -1,10 +1,17 @@
+import { Routes, Route } from 'react-router-dom';
+import { HomePage } from './pages/HomePage';
+// import { LoginPage } from './pages/auth/LoginPage';
+// import { RegisterPage } from './pages/auth/RegisterPage';
+// import { DashboardPage } from './pages/dashboard/DashboardPage';
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900">Research Session Manager</h1>
-      </main>
-    </div>
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      {/* <Route path="/login" element={<LoginPage />} /> */}
+      {/* <Route path="/register" element={<RegisterPage />} /> */}
+      {/* <Route path="/dashboard" element={<DashboardPage />} /> */}
+    </Routes>
   );
 }
 
