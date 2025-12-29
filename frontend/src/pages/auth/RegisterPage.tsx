@@ -1,47 +1,50 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Button, Input } from '../../components/common';
 import { useAuth } from '../../context/AuthContext';
 
+const registerSchema = z
+  .object({
+    name: z.string().min(1, 'Name is required'),
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
 export function RegisterPage() {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register: registerUser } = useAuth();
+  const [apiError, setApiError] = useState('');
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    // Validointi
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
-    setIsLoading(true);
+  const onSubmit = async (data: RegisterFormData) => {
+    setApiError('');
 
     try {
-      await register(name, email, password);
+      await registerUser(data.name, data.email, data.password);
       navigate('/dashboard');
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        setApiError(err.message);
       } else {
-        setError('Registration failed. Please try again.');
+        setApiError('Registration failed. Please try again.');
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -49,42 +52,38 @@ export function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center mb-6">Register</h1>
-        
-        {error && (
+
+        {apiError && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-            {error}
+            {apiError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input
             label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+            error={errors.name?.message}
+            {...register('name')}
           />
           <Input
             label="Email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            error={errors.email?.message}
+            {...register('email')}
           />
           <Input
             label="Password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            error={errors.password?.message}
+            {...register('password')}
           />
           <Input
             label="Confirm Password"
             type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
           />
-          <Button type="submit" size="lg" loading={isLoading}>
+          <Button type="submit" size="lg" loading={isSubmitting}>
             Register
           </Button>
         </form>
