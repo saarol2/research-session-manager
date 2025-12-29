@@ -4,12 +4,12 @@ import * as authService from '../services/authService.js';
 export default async function authRoutes(server: FastifyInstance) {
   // POST /auth/register - Register
   server.post<{
-    Body: { email: string; password: string; name?: string };
+    Body: { email: string; password: string; name: string };
   }>('/register', async (request, reply) => {
     const { email, password, name } = request.body;
 
-    if (!email || !password) {
-      return reply.status(400).send({ error: 'Email and password are required' });
+    if (!email || !password || !name) {
+      return reply.status(400).send({ error: 'Email, password, and name are required' });
     }
 
     if (password.length < 6) {

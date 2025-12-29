@@ -6,7 +6,7 @@ const SALT_ROUNDS = 10;
 export interface RegisterInput {
   email: string;
   password: string;
-  name?: string;
+  name: string;
 }
 
 export interface LoginInput {
